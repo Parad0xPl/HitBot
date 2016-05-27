@@ -1,5 +1,5 @@
 async = require 'async'
-websocketclient = require('websocket').client
+W3CWebSocket = require('websocket').w3cwebsocket
 getToken = (username, password) =>
   data =
     "login": username,
@@ -24,7 +24,8 @@ getWSServers = (callback) =>
       $.get new String().concat("http://",i.server_ip,"/socket.io/1/"), (data, status) =>
         if status is "success"
           txt = data.split(":")[0]
-          add = new String().concat("ws://",i.server_ip,txt)
+          server_ip = new String().concat i.server_ip, "/socket.io/1/websocket/"
+          add = new String().concat("ws://",server_ip,txt)
           console.log add
           cb null, add
     ,(err, results) =>
