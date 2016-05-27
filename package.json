@@ -8,7 +8,8 @@
     "start": "electron main.js"
   },
   "dependencies" :
-  { "async" : "^2.0.0-rc.5"
+  { "async" : "^2.0.0-rc.5",
+    "websocket" : "^1.0.23"
   },
   "author": "KsawK",
   "license": "ISC",
