@@ -1,5 +1,6 @@
 async = require 'async'
 W3CWebSocket = require('websocket').w3cwebsocket
+
 getToken = (username, password) =>
   data =
     "login": username,
@@ -13,6 +14,7 @@ getToken = (username, password) =>
     return JSON.parse(request.response).authToken
   else
     return [request.status,request.statusText]
+
 getWSServers = (callback) =>
   request = new XMLHttpRequest()
   request.open "GET", "https://api.hitbox.tv/chat/servers", false
@@ -35,5 +37,36 @@ getWSServers = (callback) =>
     return null
   else
     return error
+
+getConnection = (cb) =>
+  client = null
+  getWSServers((err, list) =>
+    test = false
+    n = -1;
+    async.until(()=>
+      n++
+      return test || n>=list.length
+    ,(callback)=>
+      client = new W3CWebSocket list[n]
+      client.onerror = () =>
+        console.log "Connection Error"
+        callback null
+      client.onopen = () =>
+        console.log('WebSocket Client Connected');
+        test = true
+        callback null, 2
+      client.onclose = () =>
+        console.log("Connection Closed")
+        callback null
+      client.onmessage = (e) =>
+        if typeof e.data is "string"
+          if e.data is "2::"
+            client.send "2::"
+      return
+    ,(err, n)=>
+      if n is 2
+        cb client
+      return
+    ))
 
 console.log("Engine Initialized")
