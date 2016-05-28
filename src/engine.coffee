@@ -28,7 +28,6 @@ getWSServers = (callback) =>
           txt = data.split(":")[0]
           server_ip = new String().concat i.server_ip, "/socket.io/1/websocket/"
           add = new String().concat("ws://",server_ip,txt)
-          console.log add
           cb null, add
     ,(err, results) =>
       callback null, results
@@ -68,5 +67,19 @@ getConnection = (cb) =>
         cb client
       return
     ))
+
+W3CWebSocket.prototype.sendPackage = (pack) ->
+  return sendPackage pack, this
+
+sendPackage = (pack, client) =>
+  unless typeof pack == "object"
+    throw new TypeError("Wrong type of package. Expected: Object")
+  unless client instanceof W3CWebSocket
+    throw new TypeError("Wrong type of client. Expected: W3CWebSocket")
+  data =
+    name: "message"
+    args: [pack]
+  data = new String().concat("5:::", JSON.stringify(data))
+  client.send(data)
 
 console.log("Engine Initialized")
