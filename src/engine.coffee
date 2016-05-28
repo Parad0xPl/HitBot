@@ -68,6 +68,10 @@ getConnection = (cb) =>
       return
     ))
 
+W3CWebSocket.prototype.nick = "KsawK"
+W3CWebSocket.prototype.nickColor = "000000"
+W3CWebSocket.prototype.channel = "KsawK"
+
 W3CWebSocket.prototype.sendPackage = (pack) ->
   return sendPackage pack, this
 
@@ -81,5 +85,42 @@ sendPackage = (pack, client) =>
     args: [pack]
   data = new String().concat("5:::", JSON.stringify(data))
   client.send(data)
+
+W3CWebSocket.prototype.sendMessage = (msg) ->
+  return sendMessage msg, this
+
+sendMessage = (msg, client) =>
+  unless typeof msg == "string"
+    throw new TypeError("Wrong type of message. Expected: String")
+  unless client instanceof W3CWebSocket
+    throw new TypeError("Wrong type of client. Expected: W3CWebSocket")
+  data =
+    method:"chatMsg"
+    params:
+      channel:client.channel.toLowerCase()
+      name:client.nick
+      nameColor:client.nickColor
+      text:msg
+  client.sendPackage data, client
+
+W3CWebSocket.prototype.sendDirectMessage = (msg, usr) ->
+  return sendDirectMessage msg, usr, this
+
+sendDirectMessage = (msg, usr, client) =>
+  unless typeof msg == "string"
+    throw new TypeError("Wrong type of message. Expected: String")
+  unless typeof usr == "string"
+    throw new TypeError("Wrong type of user. Expected: String")
+  unless client instanceof W3CWebSocket
+    throw new TypeError("Wrong type of client. Expected: W3CWebSocket")
+  data =
+    method:"directMsg"
+    params:
+      channel:client.channel.toLowerCase()
+      from:client.nick
+      to:usr
+      nameColor:client.nickColor
+      text:msg
+  client.sendPackage data, client
 
 console.log("Engine Initialized")
