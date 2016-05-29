@@ -37,7 +37,7 @@ getWSServers = (callback) =>
   else
     return error
 
-getConnection = (channel, token, cb) =>
+getConnection = (nick, channel, token, cb) =>
   client = null
   getWSServers((err, list) =>
     test = false
@@ -49,6 +49,7 @@ getConnection = (channel, token, cb) =>
       client = new W3CWebSocket list[n]
       client.channel = channel
       client.userToken = token
+      client.nick = nick
       client.onerror = () =>
         console.log "Connection Error"
         callback null
@@ -70,9 +71,10 @@ getConnection = (channel, token, cb) =>
       return
     ))
 
-W3CWebSocket.prototype.nick = "KsawK"
 W3CWebSocket.prototype.nickColor = "000000"
-W3CWebSocket.prototype.channel = "matuspl"
+W3CWebSocket.prototype.nick = null
+W3CWebSocket.prototype.channel = null
+W3CWebSocket.prototype.authToken = null
 
 W3CWebSocket.prototype.sendPackage = (pack) ->
   return sendPackage pack, this
@@ -255,5 +257,84 @@ subMode = (bool, client) =>
       subscriber:bool
       rate:"0"
   sendPackage data, client
+
+class triggerController
+
+  constructor: () ->
+    this.list = {}
+
+  register: (name, trigger, pluginName, func) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of name. Expected: String")
+    unless typeof trigger == "string"
+      throw new TypeError("Wrong type of trigger. Expected: String")
+    unless typeof pluginName is "string"
+      throw new TypeError("Wrong type of pluginName. Expected: String")
+    unless typeof func is "function"
+      throw new TypeError("Wrong type of function. Expected: function")
+    unless typeof this.list[name] is "undefined"
+      throw "nameUsed"
+    this.list[name] =
+      plugin: pluginName
+      trigger: new RegExp(trigger)
+      func: func
+    return
+
+  unRegister: (name) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of name. Expected: String")
+    if typeof this.list[name] == "undefined"
+      throw "triggerDoesntExist"
+    delete this.list[name]
+    return
+
+  exec: (str, data) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of string. Expected: String")
+    for key, value of this.list
+      if this.list[key].trigger.test str
+        this.list[key].func data
+    return
+
+class commandController
+
+  constructor: (prefix = "!") ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of prefix. Expected: String")
+    this.prefix = prefix
+    this.list = {}
+
+  register: (name, command, pluginName, func) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of name. Expected: String")
+    unless typeof command == "string"
+      throw new TypeError("Wrong type of command. Expected: String")
+    unless typeof pluginName is "string"
+      throw new TypeError("Wrong type of pluginName. Expected: String")
+    unless typeof func is "function"
+      throw new TypeError("Wrong type of function. Expected: function")
+    unless typeof this.list[name] is "undefined"
+      throw "nameUsed"
+    this.list[name] =
+      plugin: pluginName
+      command: command
+      func: func
+    return
+
+  unRegister: (name) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of name. Expected: String")
+    if typeof this.list[name] == "undefined"
+      throw "triggerDoesntExist"
+    delete this.list[name]
+    return
+
+  exec: (str, data) ->
+    unless typeof name == "string"
+      throw new TypeError("Wrong type of string. Expected: String")
+    for key, value of this.list
+      if str is this.prefix+this.list[key].command
+        this.list[key].func data
+    return
 
 console.log("Engine Initialized")
