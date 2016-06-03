@@ -6,12 +6,51 @@ appDir = ipc.sendSync 'get-app-path'
 pluginsDir = null
 $.ready(
   pluginsDir = path.resolve './plugins'
-  fs.readDir pluginsDir, (err, files) ->
-    async.each files, (file, callback) ->
-      mod = require file
   triggers = new triggerController
   commands = new commandController "!"
   directCommand = new commandController "/"
+  fs.readdir pluginsDir, (err, files) ->
+    async.each files, (file, callback) ->
+      file = path.resolve "./plugins/#{file}"
+      if new RegExp(/.*.js/g).test(file)
+        plugin = require file
+        console.log plugin
+        unless typeof plugin.apiVersion is "string"
+          throw new TypeError("ApiVersion is not a String")
+          callback "ApiVersion is not a String"
+          return
+        else
+          if plugin.apiVersion is "1.0"
+            unless typeof plugin.name is "string"
+              throw new TypeError("Name is not a String")
+              callback "Name is not a String"
+              return
+            unless typeof plugin.init is "function"
+              throw new TypeError("Init is not a Function")
+              callback "Init is not a Function"
+              return
+            else
+              plugin.init()
+            unless plugin.triggers instanceof Array
+              throw new TypeError("Triggers is not an Array")
+              callback "Triggers is not an Array"
+              return
+            else
+              for trg in plugin.triggers
+                triggers.register trg.name, trg.trigger, plugin.name, trg.func
+            unless plugin.commands instanceof Array
+              throw new TypeError("Commands is not an Array")
+              callback "Commands is not an Array"
+              return
+            else
+              for cmd in plugin.commands
+                commands.register cmd.name, cmd.trigger, plugin.name, cmd.func
+            callback()
+            return
+          else
+            callback "Wrong api version"
+            return
+
   userToken = getToken "KsawK", ""
   getConnection "KsawK","ksawk", userToken, (cli) =>
     client = cli
