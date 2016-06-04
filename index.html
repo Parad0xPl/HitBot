@@ -8,11 +8,41 @@
       window.$ = window.jQuery = require("./lib/jquery-2.2.4.js")
     </script>
     <link rel="stylesheet" href="lib/bootstrap-3.3.6/css/bootstrap.css">
+    <link rel="stylesheet" href="index.css">
     <script src="lib/bootstrap-3.3.6/js/bootstrap.js"></script>
     <script src="src/engine.js"></script>
     <script src="src/process.js"></script>
   </head>
-  <body>
-
+  <body style="height:100vh">
+    <div class="container-fluid" style="height:100%;padding:0">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a id="main" href="#" class="nav-link active">Main</a>
+        </li>
+        <li class="nav-item">
+          <a id="cmdList" href="#" class="nav-link">List</a>
+        </li>
+        <li class="nav-item">
+          <a id="log" href="#" class="nav-link">Log</a>
+        </li>
+        <li class="nav-item">
+          <a id="settings" href="#" class="nav-link">Settings</a>
+        </li>
+      </ul>
+      <div id="viewport" style="height:100%">
+        <div id="main" class="container-fluid">
+          Main
+        </div>
+        <div id="cmdList" class="container-fluid" style="display: none">
+          CMD
+        </div>
+        <div id="log" class="container-fluid" style="display: none">
+          LOG
+        </div>
+        <div id="settings" class="container-fluid active" style="display: none">
+          Settings
+        </div>
+      </div>
+    </div>
   </body>
 </html>
