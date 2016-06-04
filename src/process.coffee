@@ -9,6 +9,14 @@ commands = null
 directCommands = null
 userToken = null
 $(document).ready( () ->
+  navButtons = $(".nav a")
+  navButtons.click () ->
+    id = $(this).attr "id"
+    viewport = $("div#viewport div##{id}")
+    viewport.css "display", "block"
+    viewport.siblings().css "display", "none"
+    return
+
   pluginsDir = path.resolve './plugins'
   triggers = new triggerController
   commands = new commandController "!"
