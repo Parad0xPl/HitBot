@@ -4,11 +4,15 @@ ipc = require('electron').ipcRenderer
 path = require 'path'
 appDir = ipc.sendSync 'get-app-path'
 pluginsDir = null
-$.ready(
+triggers = null
+commands = null
+directCommands = null
+userToken = null
+$(document).ready( () ->
   pluginsDir = path.resolve './plugins'
   triggers = new triggerController
   commands = new commandController "!"
-  directCommand = new commandController "/"
+  directCommands = new commandController "/"
   fs.readdir pluginsDir, (err, files) ->
     async.each files, (file, callback) ->
       file = path.resolve "./plugins/#{file}"
@@ -52,9 +56,9 @@ $.ready(
             return
 
   userToken = getToken "KsawK", ""
-  getConnection "KsawK","ksawk", userToken, (cli) =>
+  getConnection "KsawK","ksawk", userToken, (cli) ->
     client = cli
-    client.onmessage = (e) =>
+    client.onmessage = (e) ->
       if typeof e.data is "string"
         data = e.data
         if data is "2::"
@@ -72,13 +76,14 @@ $.ready(
             console.log "SYSTEM: #{data.params.text}"
           else if data.method is "directMsg"
             console.log "#{data.params.from} to #{client.nick}: #{data.params.text}"
-            directCommand.exec(data.params.text, data)
+            directCommands.exec(data.params.text, data)
           else if data.method is "loginMsg"
             console.log "Logged to #{data.params.channel} as #{data.params.name} with role #{data.params.role}"
           else
             console.log data
         else
           console.log data
+  return
 )
 tempint = setInterval(() ->
   unless client? and triggers?
