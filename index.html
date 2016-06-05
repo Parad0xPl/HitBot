@@ -13,9 +13,9 @@
     <script src="src/engine.js"></script>
     <script src="src/process.js"></script>
   </head>
-  <body style="height:100vh">
-    <div class="container-fluid" style="height:100%;padding:0">
-      <ul class="nav nav-tabs">
+  <body style="height:100vh;width:100vw">
+    <div class="container-fluid" style="height:100%;padding:0;display:flex;flex-direction:column">
+      <ul class="nav nav-tabs" style="flex: 0 1 auto">
         <li class="nav-item">
           <a id="main" href="#" class="nav-link active">Main</a>
         </li>
@@ -29,18 +29,58 @@
           <a id="settings" href="#" class="nav-link">Settings</a>
         </li>
       </ul>
-      <div id="viewport" style="height:100%">
-        <div id="main" class="container-fluid">
-          Main
+      <div id="viewport" class="container-fluid" style="flex:1 1 auto;width:100%;">
+        <div id="main" class="container-fluid" style="">
+          <div class="row">
+            <div class="col-xs-4">
+              MAIN
+            </div>
+            <div class="col-xs-4">
+              MAIN
+            </div>
+            <div class="col-xs-4">
+              MAIN
+            </div>
+          </div>
         </div>
         <div id="cmdList" class="container-fluid" style="display: none">
-          CMD
+          <div class="row">
+            <div class="col-xs-4">
+              CMD
+            </div>
+            <div class="col-xs-4">
+              CMD
+            </div>
+            <div class="col-xs-4">
+              CMD
+            </div>
+          </div>
         </div>
         <div id="log" class="container-fluid" style="display: none">
-          LOG
+          <div class="row">
+            <div class="col-xs-4">
+              LOG
+            </div>
+            <div class="col-xs-4">
+              LOG
+            </div>
+            <div class="col-xs-4">
+              LOG
+            </div>
+          </div>
         </div>
         <div id="settings" class="container-fluid active" style="display: none">
-          Settings
+          <div class="row">
+            <div class="col-xs-4">
+              Settings
+            </div>
+            <div class="col-xs-4">
+              Settings
+            </div>
+            <div class="col-xs-4">
+              Settings
+            </div>
+          </div>
         </div>
       </div>
     </div>
