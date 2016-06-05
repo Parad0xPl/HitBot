@@ -25,5 +25,14 @@
 }
 
 #viewport > * > * > *{
-  padding: 15px;
+  padding: 10px;
+}
+
+#chat > #nick {
+  font-weight:bold;
+}
+
+#userList > li {
+  padding: 5px 10px;
+  line-height: normal;
 }

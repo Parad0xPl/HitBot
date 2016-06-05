@@ -35,14 +35,18 @@
             <div class="col-xs-4">
               MAIN
             </div>
-            <div class="col-xs-4">
-              MAIN
+            <div class="col-xs-4" style="overflow-x:auto">
+              <ul id="userList" class="list-group" style="margin-bottom:0">
+                <li class="list-group-item">Nick</li>
+              </ul>
             </div>
             <div class="col-xs-4" style="padding:0;background-color:#EFEFEF;display:flex;flex-direction:column">
-              <div class="container-fluid" style="flex:1 1 auto">
-
+              <div class="container-fluid" style="flex:1 1 auto; padding 0;width:100%;position:relative">
+                <div id="chat" style="padding:10px;overflow-y:auto;position:absolute;width:100%;height:100%">
+                  <div id="nick">Nick</div>
+                </div>
               </div>
-              <textarea class="form-control" rows="3" style="flex:0 1 auto;"></textarea>
+              <textarea class="form-control" rows="3" style="flex:0 1 auto;padding: 0.2em 0.5em;"></textarea>
             </div>
           </div>
         </div>
