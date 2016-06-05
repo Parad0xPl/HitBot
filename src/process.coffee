@@ -11,7 +11,7 @@ userToken = null
 user = null
 pass = null
 lastUser = null
-
+listInterval = null
 $(document).ready( () ->
   #part about html
 
@@ -29,6 +29,7 @@ $(document).ready( () ->
   $role = $("#main #roleBar")
   $btnConnect = $("#main #btnConnect")
   $chat = $("#main #chat")
+  $list = $("#main #userList")
 
   addNick = (nick, color) ->
     $chat.append("<div id=\"nick\" style=\"color:#{color}\">#{nick}</div>")
@@ -150,10 +151,32 @@ $(document).ready( () ->
             else if data.method is "directMsg"
               console.log "#{data.params.from} to #{client.nick}: #{data.params.text}"
               directCommands.exec(data.params.text, data)
+            else if data.method is "userList"
+              $list.children().remove()
+              for item in data.params.data.admin
+                $list.append("<li class=\"list-group-item\">#{item}</li>")
+              for item in data.params.data.user
+                $list.append("<li class=\"list-group-item\">#{item}</li>")
+              for item in data.params.data.anon
+                $list.append("<li class=\"list-group-item\">#{item}</li>")
+            else if data.method is "banList"
+              null
             else if data.method is "loginMsg"
               $status.val "Online"
               setColor $status, "suc"
               $role.val data.params.role.charAt(0).toUpperCase()+data.params.role.slice(1)
+              listInterval = setInterval(() ->
+                data =
+                  method: "getChannelUserList"
+                  params:
+                    channel:client.channel
+                client.sendPackage data
+              , 5000)
+              data =
+                method: "getChannelUserList"
+                params:
+                  channel:client.channel
+              client.sendPackage data
               console.log "Logged to #{data.params.channel} as #{data.params.name} with role #{data.params.role}"
             else
               console.log data
