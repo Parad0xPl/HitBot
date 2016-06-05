@@ -12,9 +12,9 @@ user = null
 pass = null
 lastUser = null
 listInterval = null
+
 $(document).ready( () ->
   #part about html
-
   navButtons = $(".nav a")
   navButtons.click () ->
     id = $(this).attr "id"
