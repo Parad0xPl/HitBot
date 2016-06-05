@@ -11,6 +11,10 @@
   height: 100%;
 }
 
+#viewport > * > * > * * {
+  height: initial;
+}
+
 #viewport {
   position: relative;
 }
@@ -18,4 +22,8 @@
 #viewport > * {
   position: absolute;
   width: 100%
+}
+
+#viewport > * > * > *{
+  padding: 15px;
 }
