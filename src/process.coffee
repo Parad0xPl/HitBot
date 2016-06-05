@@ -8,7 +8,13 @@ triggers = null
 commands = null
 directCommands = null
 userToken = null
+user = null
+pass = null
+lastUser = null
+
 $(document).ready( () ->
+  #part about html
+
   navButtons = $(".nav a")
   navButtons.click () ->
     id = $(this).attr "id"
@@ -16,6 +22,40 @@ $(document).ready( () ->
     viewport.css "display", "block"
     viewport.siblings().css "display", "none"
     return
+
+  #part about process
+  $channel = $("#main #channelBar")
+  $status = $("#main #statusBar")
+  $role = $("#main #roleBar")
+  $btnConnect = $("#main #btnConnect")
+  $chat = $("#main #chat")
+
+  addNick = (nick, color) ->
+    $chat.append("<div id=\"nick\" style=\"color:#{color}\">#{nick}</div>")
+
+  addMessage = (message) ->
+    $chat.append("<div id=\"message\">#{message}</div>")
+
+  setColor = (element, clrClass) ->
+    set = ["err", "suc"]
+    if element.hasClass clrClass
+      return
+    for x in set
+      if element.hasClass x
+        element.removeClass x
+        element.addClass clrClass
+        return
+    element.addClass x
+    return
+
+  setAlert = (message) ->
+    setColor $status, "err"
+    $status.val message
+    setTimeout( () ->
+      if $status.val() is message
+        setColor $status, "err"
+        $status.val "Offline"
+    , 1000)
 
   pluginsDir = path.resolve './plugins'
   triggers = new triggerController
@@ -63,34 +103,62 @@ $(document).ready( () ->
             callback "Wrong api version"
             return
 
-  userToken = getToken "KsawK", ""
-  getConnection "KsawK","ksawk", userToken, (cli) ->
-    client = cli
-    client.onmessage = (e) ->
-      if typeof e.data is "string"
-        data = e.data
-        if data is "2::"
-          client.send "2::"
-        else if data is "1::"
-          console.log data
-        else if data.slice(0,4) is "5:::"
-          data = JSON.parse(JSON.parse(data.slice(4)).args[0])
-          if data.method is "chatMsg"
-            console.log "#{data.params.name}: #{data.params.text}"
-            unless data.params.name is client.nick
-              triggers.exec(data.params.text, data)
-              commands.exec(data.params.text, data)
-          else if data.method is "infoMsg"
-            console.log "SYSTEM: #{data.params.text}"
-          else if data.method is "directMsg"
-            console.log "#{data.params.from} to #{client.nick}: #{data.params.text}"
-            directCommands.exec(data.params.text, data)
-          else if data.method is "loginMsg"
-            console.log "Logged to #{data.params.channel} as #{data.params.name} with role #{data.params.role}"
+  $btnConnect.click () ->
+    channel = $channel.val()
+    console.log channel
+    if channel is ""
+      setAlert "Channel is needed"
+      return
+    if isUser channel.toLowerCase()
+      setAlert "Channel does not exit"
+      return
+    if user is "" or user is null
+      setAlert "User is needed"
+      return
+    if isUser user.toLowerCase()
+      setAlert "User does not exit"
+      return
+    if pass is "" or pass is null
+      setAlert "Password is needed"
+      return
+    userToken = getToken user, pass
+    unless typeof userToken is "string"
+      setAlert "Authentication fail"
+      return
+    getConnection "KsawK",channel.toLowerCase(), userToken, (cli) ->
+      client = cli
+      client.onmessage = (e) ->
+        if typeof e.data is "string"
+          data = e.data
+          if data is "2::"
+            client.send "2::"
+          else if data is "1::"
+            console.log data
+          else if data.slice(0,4) is "5:::"
+            data = JSON.parse(JSON.parse(data.slice(4)).args[0])
+            if data.method is "chatMsg"
+              console.log "#{data.params.name}: #{data.params.text}"
+              unless lastUser is data.params.name
+                addNick data.params.name, "#"+data.params.nameColor
+                lastUser = data.params.name
+              addMessage data.params.text
+              unless data.params.name is client.nick
+                triggers.exec(data.params.text, data)
+                commands.exec(data.params.text, data)
+            else if data.method is "infoMsg"
+              console.log "SYSTEM: #{data.params.text}"
+            else if data.method is "directMsg"
+              console.log "#{data.params.from} to #{client.nick}: #{data.params.text}"
+              directCommands.exec(data.params.text, data)
+            else if data.method is "loginMsg"
+              $status.val "Online"
+              setColor $status, "suc"
+              $role.val data.params.role.charAt(0).toUpperCase()+data.params.role.slice(1)
+              console.log "Logged to #{data.params.channel} as #{data.params.name} with role #{data.params.role}"
+            else
+              console.log data
           else
             console.log data
-        else
-          console.log data
   return
 )
 tempint = setInterval(() ->

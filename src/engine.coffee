@@ -13,7 +13,17 @@ getToken = (username, password) ->
   if request.status is 200
     return JSON.parse(request.response).authToken
   else
+    console.log request.status,request.statusText
     return [request.status,request.statusText]
+
+isUser = (username) ->
+  request = new XMLHttpRequest()
+  request.open "GET", "https://api.hitbox.tv/user/#{username}", false
+  request.send
+  if request.status is 200
+    return true
+  else
+    return false
 
 getWSServers = (callback) ->
   request = new XMLHttpRequest()
