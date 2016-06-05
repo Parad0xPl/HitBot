@@ -36,3 +36,19 @@
   padding: 5px 10px;
   line-height: normal;
 }
+
+#cntPart input[type="text"] {
+  text-align: right;
+}
+
+#cntPart input[readonly] {
+  background-color: #ffffff;
+}
+
+.err {
+  color: #d81a1d
+}
+
+.suc {
+
+}

@@ -32,8 +32,25 @@
       <div id="viewport" class="container-fluid" style="flex:1 1 auto;width:100%;">
         <div id="main" class="container-fluid" style="">
           <div class="row">
-            <div class="col-xs-4">
-              MAIN
+            <div id="cntPart" class="col-xs-4">
+              <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">Channel</span>
+                <input id="channelBar" type="text" class="form-control">
+              </div>
+              </br>
+              <div class="input-group">
+                <button id="btnConnect" type="button" class="btn btn-primary">Connect</button>
+              </div>
+              </br>
+              <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">Status</span>
+                <input id="statusBar" type="text" class="form-control err" readonly value="Offline">
+              </div>
+              </br>
+              <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">Role</span>
+                <input id="roleBar" type="text" class="form-control" readonly value="">
+              </div>
             </div>
             <div class="col-xs-4" style="overflow-x:auto">
               <ul id="userList" class="list-group" style="margin-bottom:0">
