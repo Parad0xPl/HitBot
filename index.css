@@ -37,7 +37,7 @@
   line-height: normal;
 }
 
-#cntPart input[type="text"] {
+input[type="text"], input[type="password"] {
   text-align: right;
 }
 
