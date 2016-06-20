@@ -31,6 +31,10 @@ $(document).ready( () ->
   $chat = $("#main #chat")
   $list = $("#main #userList")
 
+  $("#settings #btnSave").click () ->
+    user = $("#stgLogin").val()
+    pass = $("#stgPassword").val()
+
   addNick = (nick, color) ->
     $chat.append("<div id=\"nick\" style=\"color:#{color}\">#{nick}</div>")
 
