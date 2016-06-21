@@ -13,11 +13,21 @@ pass = null
 lastUser = null
 listInterval = null
 
+addMessage = null
+
+onShow = {}
+
+onShow["settings"] = () ->
+  console.log "Settings"
+  return
+
 $(document).ready( () ->
   #part about html
   navButtons = $(".nav a")
   navButtons.click () ->
     id = $(this).attr "id"
+    if typeof onShow[id] is "function"
+      onShow[id]();
     viewport = $("div#viewport div##{id}")
     viewport.css "display", "block"
     viewport.siblings().css "display", "none"
@@ -35,11 +45,21 @@ $(document).ready( () ->
     user = $("#stgLogin").val()
     pass = $("#stgPassword").val()
 
+  addToChat = (x) ->
+    if Math.abs($chat[0].scrollHeight - $chat[0].scrollTop - $chat[0].clientHeight) < 5
+      flag = 1
+    else
+      flag = 0
+    $chat.append x
+    if flag
+      $chat.scrollTop($chat[0].scrollHeight)
+    return
+
   addNick = (nick, color) ->
-    $chat.append("<div id=\"nick\" style=\"color:#{color}\">#{nick}</div>")
+    addToChat "<div id=\"nick\" style=\"color:#{color}\">#{nick}</div>"
 
   addMessage = (message) ->
-    $chat.append("<div id=\"message\">#{message}</div>")
+    addToChat "<div id=\"message\">#{message}</div>"
 
   setColor = (element, clrClass) ->
     set = ["err", "suc"]
