@@ -45,6 +45,14 @@ $(document).ready( () ->
     user = $("#stgLogin").val()
     pass = $("#stgPassword").val()
 
+  $("#chatInput").keypress (e) ->
+    unless client? && client.readyState is 1
+      return false
+    if $("#chatInput").is(':focus') && e.which is 13 && client
+      client.sendMessage $("#chatInput").val()
+      $("#chatInput").val ""
+      return false
+
   addToChat = (x) ->
     if Math.abs($chat[0].scrollHeight - $chat[0].scrollTop - $chat[0].clientHeight) < 5
       flag = 1
