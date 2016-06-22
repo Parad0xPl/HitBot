@@ -32,6 +32,12 @@
   font-weight:bold;
 }
 
+#userList #badge {
+  height: 1.5em;
+  padding-right: 0.25em;
+  margin-left: -0.25em;
+}
+
 #userList > li {
   padding: 5px 10px;
   line-height: normal;

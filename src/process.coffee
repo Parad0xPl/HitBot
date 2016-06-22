@@ -53,6 +53,29 @@ $(document).ready( () ->
       $("#chatInput").val ""
       return false
 
+  subImg = null
+  addToList = (usr, status, sub = 0) ->
+    if subImg is null
+      request = new XMLHttpRequest()
+      request.open "GET", "https://api.hitbox.tv/mediabadges/#{client.channel}", false
+      request.send()
+      if request.status is 200
+        console.debug JSON.parse(request.response)
+        subImg = "https://edge.sf.hitbox.tv/"+JSON.parse(request.response).badges[0].badge_image
+      else
+        console.log request.status, request.statusText
+    node = $("<li class=\"list-group-item\"></li>")
+    if status is "admin"
+      node.append "<span class=\"badge\">Admin</span>"
+    else if status is "mod"
+      node.append "<span class=\"badge\">Mod</span>"
+    else if status is "user"
+      null
+    if sub
+      node.append("<img id=\"badge\" src=\"#{subImg}\" style=\"\"></img>")
+    node.append usr
+    $list.append node
+
   addToChat = (x) ->
     if Math.abs($chat[0].scrollHeight - $chat[0].scrollTop - $chat[0].clientHeight) < 5
       flag = 1
@@ -185,12 +208,20 @@ $(document).ready( () ->
               directCommands.exec(data.params.text, data)
             else if data.method is "userList"
               $list.children().remove()
+              data.params.data.admin.sort()
+              data.params.data.user.sort()
+              data.params.data.anon.sort()
+              console.log data.params.data
               for item in data.params.data.admin
-                $list.append("<li class=\"list-group-item\">#{item}</li>")
+                addToList item, "admin", data.params.data.isSubscriber.indexOf(item) != -1
               for item in data.params.data.user
-                $list.append("<li class=\"list-group-item\">#{item}</li>")
+                addToList item, "mod", data.params.data.isSubscriber.indexOf(item) != -1
               for item in data.params.data.anon
-                $list.append("<li class=\"list-group-item\">#{item}</li>")
+                if data.params.data.isSubscriber.indexOf(item) != -1
+                  addToList item, "user", 1
+              for item in data.params.data.anon
+                if data.params.data.isSubscriber.indexOf(item) == -1
+                  addToList item, "user", 0
             else if data.method is "banList"
               null
             else if data.method is "loginMsg"
