@@ -13,12 +13,73 @@ pass = null
 lastUser = null
 listInterval = null
 
+plugins = {}
+pluginsDir = path.resolve './plugins'
+pluginInit pluginsDir, plugins
+triggers = new triggerController
+commands = new commandController "!"
+directCommands = new commandController "/"
+
 addMessage = null
 
-onShow = {}
+$html = {}
 
+drawSettings = (sett, configName) =>
+  console.log sett
+  $html.pluginSetting.empty();
+  $html.pluginSetting.attr "configName", configName
+  for x in sett.hierarchy
+    if x.type is "label"
+      node = $("""
+      <label id="#{x.id}" for="basic-url">#{x.name}</label>
+      """)
+    else if x.type is "text"
+      node = $("""
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">#{x.name}</span>
+          <input id="#{x.id}" type="text" class="form-control" value="#{x.defaultValue}">
+        </div>
+      """)
+    else if x.type is "password"
+      node = $("""
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">#{x.name}</span>
+          <input id="#{x.id}" type="password" class="form-control" value="#{x.defaultValue}">
+        </div>
+      """)
+    else if x.type is "button"
+      node = $("""
+        <div class="input-group clearfix">
+        </div>
+      """)
+      btn = $("""
+        <button id="#{x.id}" type="button" class="btn btn-primary pull-right">#{x.name}</button>
+      """)
+      if x.func?
+        btn.click x.func
+      node.append btn
+    $html.pluginSetting.append node
+    $html.pluginSetting.append $("</br>")
+  return
+
+packedDrawSettings = (a, b) ->
+  return () ->
+    drawSettings(a, b)
+    return
+
+onShow = {}
 onShow["settings"] = () ->
-  console.log "Settings"
+  $html.pluginsList = $("#settings #pluginsList")
+  $html.pluginSetting = $("#settings #pluginSetting")
+  if plugins[0] instanceof Array
+    $html.pluginsList.empty();
+    $html.pluginSetting.empty();
+    for x in plugins[0]
+      node = $("<span>#{x.name}</span>")
+      console.log x
+      node.click packedDrawSettings(x.settings, x.confignNme)
+      $html.pluginsList.append(node);
+      $html.pluginsList.append("</br>");
   return
 
 $(document).ready( () ->
@@ -34,12 +95,12 @@ $(document).ready( () ->
     return
 
   #part about process
-  $channel = $("#main #channelBar")
-  $status = $("#main #statusBar")
-  $role = $("#main #roleBar")
-  $btnConnect = $("#main #btnConnect")
-  $chat = $("#main #chat")
-  $list = $("#main #userList")
+  $html.channel = $("#main #channelBar")
+  $html.status = $("#main #statusBar")
+  $html.role = $("#main #roleBar")
+  $html.btnConnect = $("#main #btnConnect")
+  $html.chat = $("#main #chat")
+  $html.list = $("#main #userList")
 
   $("#settings #btnSave").click () ->
     user = $("#stgLogin").val()
@@ -74,16 +135,16 @@ $(document).ready( () ->
     if sub
       node.append("<img id=\"badge\" src=\"#{subImg}\" style=\"\"></img>")
     node.append usr
-    $list.append node
+    $html.list.append node
 
   addToChat = (x) ->
-    if Math.abs($chat[0].scrollHeight - $chat[0].scrollTop - $chat[0].clientHeight) < 5
+    if Math.abs($html.chat[0].scrollHeight - $html.chat[0].scrollTop - $html.chat[0].clientHeight) < 5
       flag = 1
     else
       flag = 0
-    $chat.append x
+    $html.chat.append x
     if flag
-      $chat.scrollTop($chat[0].scrollHeight)
+      $html.chat.scrollTop($html.chat[0].scrollHeight)
     return
 
   addNick = (nick, color) ->
@@ -104,63 +165,17 @@ $(document).ready( () ->
     element.addClass x
     return
 
-  setAlert = (message) ->
-    setColor $status, "err"
-    $status.val message
+  setAlert = (message, time = 1000) ->
+    setColor $html.status, "err"
+    $html.status.val message
     setTimeout( () ->
-      if $status.val() is message
-        setColor $status, "err"
-        $status.val "Offline"
-    , 1000)
+      if $html.status.val() is message
+        setColor $html.status, "err"
+        $html.status.val "Offline"
+    , time)
 
-  pluginsDir = path.resolve './plugins'
-  triggers = new triggerController
-  commands = new commandController "!"
-  directCommands = new commandController "/"
-  fs.readdir pluginsDir, (err, files) ->
-    async.each files, (file, callback) ->
-      file = path.resolve "./plugins/#{file}"
-      if new RegExp(/.*.js/g).test(file)
-        plugin = require file
-        console.log plugin
-        unless typeof plugin.apiVersion is "string"
-          throw new TypeError("ApiVersion is not a String")
-          callback "ApiVersion is not a String"
-          return
-        else
-          if plugin.apiVersion is "1.0"
-            unless typeof plugin.name is "string"
-              throw new TypeError("Name is not a String")
-              callback "Name is not a String"
-              return
-            unless typeof plugin.init is "function"
-              throw new TypeError("Init is not a Function")
-              callback "Init is not a Function"
-              return
-            else
-              plugin.init()
-            unless plugin.triggers instanceof Array
-              throw new TypeError("Triggers is not an Array")
-              callback "Triggers is not an Array"
-              return
-            else
-              for trg in plugin.triggers
-                triggers.register trg.name, trg.trigger, plugin.name, trg.func
-            unless plugin.commands instanceof Array
-              throw new TypeError("Commands is not an Array")
-              callback "Commands is not an Array"
-              return
-            else
-              for cmd in plugin.commands
-                commands.register cmd.name, cmd.trigger, plugin.name, cmd.func
-            callback()
-            return
-          else
-            callback "Wrong api version"
-            return
-
-  $btnConnect.click () ->
-    channel = $channel.val()
+  $html.btnConnect.click () ->
+    channel = $html.channel.val()
     console.log channel
     if channel is ""
       setAlert "Channel is needed"
@@ -189,11 +204,9 @@ $(document).ready( () ->
           if data is "2::"
             client.send "2::"
           else if data is "1::"
-            console.log data
           else if data.slice(0,4) is "5:::"
             data = JSON.parse(JSON.parse(data.slice(4)).args[0])
             if data.method is "chatMsg"
-              console.log "#{data.params.name}: #{data.params.text}"
               unless lastUser is data.params.name
                 addNick data.params.name, "#"+data.params.nameColor
                 lastUser = data.params.name
@@ -202,16 +215,13 @@ $(document).ready( () ->
                 triggers.exec(data.params.text, data)
                 commands.exec(data.params.text, data)
             else if data.method is "infoMsg"
-              console.log "SYSTEM: #{data.params.text}"
             else if data.method is "directMsg"
-              console.log "#{data.params.from} to #{client.nick}: #{data.params.text}"
               directCommands.exec(data.params.text, data)
             else if data.method is "userList"
-              $list.children().remove()
+              $html.list.children().remove()
               data.params.data.admin.sort()
               data.params.data.user.sort()
               data.params.data.anon.sort()
-              console.log data.params.data
               for item in data.params.data.admin
                 addToList item, "admin", data.params.data.isSubscriber.indexOf(item) != -1
               for item in data.params.data.user
@@ -225,9 +235,9 @@ $(document).ready( () ->
             else if data.method is "banList"
               null
             else if data.method is "loginMsg"
-              $status.val "Online"
-              setColor $status, "suc"
-              $role.val data.params.role.charAt(0).toUpperCase()+data.params.role.slice(1)
+              $html.status.val "Online"
+              setColor $html.status, "suc"
+              $html.role.val data.params.role.charAt(0).toUpperCase()+data.params.role.slice(1)
               listInterval = setInterval(() ->
                 data =
                   method: "getChannelUserList"
@@ -240,7 +250,6 @@ $(document).ready( () ->
                 params:
                   channel:client.channel
               client.sendPackage data
-              console.log "Logged to #{data.params.channel} as #{data.params.name} with role #{data.params.role}"
             else
               console.log data
           else
@@ -248,7 +257,7 @@ $(document).ready( () ->
   return
 )
 tempint = setInterval(() ->
-  unless client? and triggers?
+  unless client? and triggers? and plugins[0]?
     return null
   else
     clearInterval tempint

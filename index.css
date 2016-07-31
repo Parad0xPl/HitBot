@@ -50,6 +50,24 @@ input[type="text"], input[type="password"] {
 #cntPart input[readonly] {
   background-color: #ffffff;
 }
+/*
+#pluginSetting > * {
+  margin-bottom: 1em;
+}*/
+
+#settings .row > div:nth-child(n+1) {
+  border-left: 1px solid #EFEFEF;
+}
+
+#settings label {
+  float: right;
+  display: block;
+  font-size: initial;
+}
+
+#settings .input-group {
+  width: 100%;
+}
 
 .err {
   color: #d81a1d;

@@ -267,10 +267,12 @@ subMode = (bool, client) ->
       rate:"0"
   sendPackage data, client
 
+## Classs
+
 class triggerController
 
   constructor: () ->
-    this.list = {}
+    @list = {}
 
   register: (name, trigger, pluginName, func) ->
     unless typeof name == "string"
@@ -281,9 +283,9 @@ class triggerController
       throw new TypeError("Wrong type of pluginName. Expected: String")
     unless typeof func is "function"
       throw new TypeError("Wrong type of function. Expected: function")
-    unless typeof this.list[name] is "undefined"
+    unless typeof @list[name] is "undefined"
       throw "nameUsed"
-    this.list[name] =
+    @list[name] =
       plugin: pluginName
       trigger: new RegExp(trigger)
       func: func
@@ -292,26 +294,26 @@ class triggerController
   unRegister: (name) ->
     unless typeof name == "string"
       throw new TypeError("Wrong type of name. Expected: String")
-    if typeof this.list[name] == "undefined"
+    if typeof @list[name] == "undefined"
       throw "triggerDoesntExist"
-    delete this.list[name]
+    delete @list[name]
     return
 
   exec: (str, data) ->
     unless typeof name == "string"
       throw new TypeError("Wrong type of string. Expected: String")
-    for key, value of this.list
-      if this.list[key].trigger.test str
-        this.list[key].func data
+    for key, value of @list
+      if @list[key].trigger.test str
+        @list[key].func data
     return
 
 class commandController
 
   constructor: (prefix = "!") ->
-    unless typeof name == "string"
+    unless typeof prefix == "string"
       throw new TypeError("Wrong type of prefix. Expected: String")
-    this.prefix = prefix
-    this.list = {}
+    @prefix = prefix
+    @list = {}
 
   register: (name, command, pluginName, func) ->
     unless typeof name == "string"
@@ -322,9 +324,9 @@ class commandController
       throw new TypeError("Wrong type of pluginName. Expected: String")
     unless typeof func is "function"
       throw new TypeError("Wrong type of function. Expected: function")
-    unless typeof this.list[name] is "undefined"
+    unless typeof @list[name] is "undefined"
       throw "nameUsed"
-    this.list[name] =
+    @list[name] =
       plugin: pluginName
       command: command
       func: func
@@ -333,17 +335,179 @@ class commandController
   unRegister: (name) ->
     unless typeof name == "string"
       throw new TypeError("Wrong type of name. Expected: String")
-    if typeof this.list[name] == "undefined"
+    if typeof @list[name] == "undefined"
       throw "triggerDoesntExist"
-    delete this.list[name]
+    delete @list[name]
     return
 
   exec: (str, data) ->
     unless typeof name == "string"
       throw new TypeError("Wrong type of string. Expected: String")
-    for key, value of this.list
-      if str is this.prefix+this.list[key].command
-        this.list[key].func data
+    for key, value of @list
+      if str is @prefix+@list[key].command
+        @list[key].func data
     return
+
+class command
+
+  constructor: (command, description, func, @direct = 0, @normal = 0) ->
+    unless typeof command is "string"
+      throw new TypeError("Wrong type of name. Expected: String")
+    @command = command
+    unless typeof description is "string"
+      throw new TypeError("Wrong type of command. Expected: String")
+    @description = description
+    unless typeof func is "function"
+      throw new TypeError("Wrong type of pluginName. Expected: String")
+    @func = func
+
+  exec: (pack) ->
+    @func pack
+    return
+
+class trigger
+
+  constructor: (trigger, description, func, @status = 0) ->
+    unless typeof trigger is "string"
+      throw new TypeError("Wrong type of trigger. Expected: string")
+    @trigger = trigger
+    unless typeof description is "string"
+      throw new TypeError("Wrong type of description. Expected: string")
+    @description = description
+    unless typeof func is "function"
+      throw new TypeError("Wrong type of function. Expected: function")
+    @func = func
+
+  exec: (pack) ->
+    @func pack
+    return
+
+class keyword
+
+  constructor: (keyword, description, func) ->
+    unless typeof keyword is "string"
+      throw new TypeError("Wrong type of keyword. Expected: string")
+    @keyword = keyword
+    unless typeof description is "string"
+      throw new TypeError("Wrong type of description. Expected: string")
+    @description = description
+    unless typeof func is "function"
+      throw new TypeError("Wrong type of pluginName. Expected: string")
+    @func = func
+
+  exec: (pack) ->
+    return @func pack
+
+class option
+
+  constructor: (id, name, type, @defaultValue = "", @func = null) ->
+    unless typeof id is "string"
+      throw new TypeError("Wrong type of id. Expected: string")
+    @id = id
+    unless typeof name is "string"
+      throw new TypeError("Wrong type of name. Expected: string")
+    @name = name
+    unless typeof type is "string"
+      throw new TypeError("Wrong type of type. Expected: string")
+    @type = type
+    return
+
+class settings
+
+  constructor: () ->
+    @hierarchy = []
+
+  addElement: (opt) ->
+    unless opt instanceof option
+      throw new TypeError("Wrong type of opt. Expected: option")
+    @hierarchy.push opt
+    return
+
+class plugin
+
+  constructor: (@name = "", @version = "0.1", @author="Anonymous", @confignNme = @name) ->
+    @commands = []
+    @triggers = []
+    @keywords = []
+    @init = null
+    @settings = new settings
+
+  setInit: (@init) ->
+
+  init: () ->
+    init()
+    return
+
+  addCommmand: (cmd) ->
+    unless cmd instanceof command
+      throw new TypeError("Wrong type of name. Expected: Command")
+    @command.push cmd
+    return
+
+  addTrigger: (trig) ->
+    unless trig instanceof trigger
+      throw new TypeError("Wrong type of trig. Expected: trigger")
+    @trig = trig
+
+  addKeyword: (keyw) ->
+    unless keyw instanceof keyword
+      throw new TypeError("Wrong type of keyw. Expected: keyword")
+    @keyw = keyw
+
+## Functions
+
+pluginInit = (dir, plug) ->
+  plugins = []
+  fs.readdir dir, (err, files) ->
+    async.each(files, (file, callback) ->
+      file = path.resolve "#{dir}/#{file}"
+      if new RegExp(/.*\.js/g).test(file)
+        pluginLocal = require(file)
+        if pluginLocal.plugin?
+          plugins.push pluginLocal.plugin
+        ###
+        unless typeof plugin.apiVersion is "string"
+          throw new TypeError("ApiVersion is not a String")
+          callback "ApiVersion is not a String"
+          return
+        else
+          console.log plugin
+          if plugin.apiVersion is "1.0"
+            unless typeof plugin.name is "string"
+              throw new TypeError("Name is not a String")
+              callback "Name is not a String"
+              return
+            unless typeof plugin.init is "function"
+              throw new TypeError("Init is not a Function")
+              callback "Init is not a Function"
+              return
+            else
+              plugin.init()
+            unless plugin.triggers instanceof Array
+              throw new TypeError("Triggers is not an Array")
+              callback "Triggers is not an Array"
+              return
+            else
+              for trg in plugin.triggers
+                triggers.register trg.name, trg.trigger, plugin.name, trg.func
+            unless plugin.commands instanceof Array
+              throw new TypeError("Commands is not an Array")
+              callback "Commands is not an Array"
+              return
+            else
+              for cmd in plugin.commands
+                commands.register cmd.name, cmd.trigger, plugin.name, cmd.func
+            callback()
+            return
+          else
+            callback "Wrong api version"
+            return
+        ###
+      callback()
+      return
+    , ()->
+      plug["0"] = plugins
+      return
+    )
 
 console.log("Engine Initialized")
